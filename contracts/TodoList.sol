@@ -13,20 +13,26 @@ contract TodoList {
 
     event TodoStore(address owner);
     event TodoRemove(address owner);
+    event TodoUpdate(address owner);
     event TodoClear(address owner);
 
 
     mapping (address =>  Todo[])  private  s_addressToTodos;
 
 
-    function storaTodo(string memory message, string memory date, bool isCompleted) public {
-        if(s_addressToTodos[msg.sender].length > 0 ) { //have todo
-        }
-        else { // doesn't have todo
-            // s_owners.push(msg.sender);
-        }
+    function storeTodo(string memory message, string memory date, bool isCompleted) public {
         s_addressToTodos[msg.sender].push(Todo(message, date, isCompleted));
         emit TodoStore(msg.sender);
+    }
+
+    function updateTodo(string memory message, string memory date, bool isCompleted, uint256 index) public {
+        Todo[] storage myTodos = s_addressToTodos[msg.sender];
+        if(index >= myTodos.length){
+            revert TodoList__NotFound();
+        }
+        myTodos[index] = Todo(message, date, isCompleted);
+        s_addressToTodos[msg.sender] = myTodos;
+        emit TodoUpdate(msg.sender);
     }
 
     function removeTodo(uint256 index) public {
