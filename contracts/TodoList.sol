@@ -2,9 +2,9 @@
 
 pragma solidity >=0.8.2 <0.9.0;
 
-error TodoContract__NotFound();
+error TodoList__NotFound();
 
-contract TodoContract {
+contract TodoList {
     struct Todo {
         string message;
         string date;
@@ -16,7 +16,6 @@ contract TodoContract {
     event TodoClear(address owner);
 
 
-    address[] private s_owners;
     mapping (address =>  Todo[])  private  s_addressToTodos;
 
 
@@ -24,7 +23,7 @@ contract TodoContract {
         if(s_addressToTodos[msg.sender].length > 0 ) { //have todo
         }
         else { // doesn't have todo
-            s_owners.push(msg.sender);
+            // s_owners.push(msg.sender);
         }
         s_addressToTodos[msg.sender].push(Todo(message, date, isCompleted));
         emit TodoStore(msg.sender);
@@ -33,7 +32,7 @@ contract TodoContract {
     function removeTodo(uint256 index) public {
         Todo[] storage myTodos = s_addressToTodos[msg.sender];
         if(index >= myTodos.length){
-            revert TodoContract__NotFound();
+            revert TodoList__NotFound();
         }
         myTodos[index] = myTodos[myTodos.length - 1];
         myTodos.pop();
@@ -44,6 +43,8 @@ contract TodoContract {
 
     function clearTodo() public {
         delete s_addressToTodos[msg.sender];
+
+
         emit TodoClear(msg.sender);
     }
 
@@ -54,9 +55,9 @@ contract TodoContract {
         return s_addressToTodos[msg.sender][index];
     }
 
-    function getOwner(uint256 index) public view returns (address) {
-        return s_owners[index];
-    }
+    // function getOwner(uint256 index) public view returns (address) {
+    //     return s_owners[index];
+    // }
 
 
 
