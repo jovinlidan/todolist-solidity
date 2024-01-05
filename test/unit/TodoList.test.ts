@@ -36,6 +36,60 @@ describe("TodoList", () => {
     });
   });
 
+  describe("markTodoDone", function () {
+    it("mark todo as done from list of addressToTodos", async function () {
+      await todoList.storeTodo(
+        "test todo",
+        new Date().getTime().toString(),
+        false
+      );
+      await todoList.markTodoDone(0);
+      const todos = await todoList.getTodos();
+      const todo = await todoList.getTodo(0);
+      assert.equal(todos.length, 1);
+      assert.equal(todo[2].valueOf(), true);
+    });
+
+    it("return error if index out of bound", async function () {
+      await todoList.storeTodo(
+        "test todo",
+        new Date().getTime().toString(),
+        false
+      );
+      await expect(todoList.markTodoDone(1)).to.be.revertedWithCustomError(
+        todoList,
+        "TodoList__NotFound"
+      );
+    });
+  });
+
+  describe("markTodoUndone", function () {
+    it("mark todo as undone from list of addressToTodos", async function () {
+      await todoList.storeTodo(
+        "test todo",
+        new Date().getTime().toString(),
+        true
+      );
+      await todoList.markTodoUndone(0);
+      const todos = await todoList.getTodos();
+      const todo = await todoList.getTodo(0);
+      assert.equal(todos.length, 1);
+      assert.equal(todo[2].valueOf(), false);
+    });
+
+    it("return error if index out of bound", async function () {
+      await todoList.storeTodo(
+        "test todo",
+        new Date().getTime().toString(),
+        true
+      );
+      await expect(todoList.markTodoUndone(1)).to.be.revertedWithCustomError(
+        todoList,
+        "TodoList__NotFound"
+      );
+    });
+  });
+
   describe("updateTodo", function () {
     it("update todo from list of addressToTodos", async function () {
       await todoList.storeTodo(

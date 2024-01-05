@@ -25,6 +25,26 @@ contract TodoList {
         emit TodoStore(msg.sender);
     }
 
+    function markTodoDone(uint256 index) public {
+        Todo[] storage myTodos = s_addressToTodos[msg.sender];
+        if(index >= myTodos.length){
+            revert TodoList__NotFound();
+        }
+        myTodos[index].isCompleted = true;
+        s_addressToTodos[msg.sender] = myTodos;
+        emit TodoUpdate(msg.sender);
+    }
+
+    function markTodoUndone(uint256 index) public {
+        Todo[] storage myTodos = s_addressToTodos[msg.sender];
+        if(index >= myTodos.length){
+            revert TodoList__NotFound();
+        }
+        myTodos[index].isCompleted = false;
+        s_addressToTodos[msg.sender] = myTodos;
+        emit TodoUpdate(msg.sender);
+    }
+
     function updateTodo(string memory message, string memory date, bool isCompleted, uint256 index) public {
         Todo[] storage myTodos = s_addressToTodos[msg.sender];
         if(index >= myTodos.length){
