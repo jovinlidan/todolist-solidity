@@ -3,6 +3,8 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { developmentChain, networkConfig } from "../helper-hardhat-config";
 import { network } from "hardhat";
 import verify from "../utils/verify";
+import dotenv from "dotenv";
+dotenv.config();
 
 const deployTodoList: DeployFunction = async (
   hre: HardhatRuntimeEnvironment
