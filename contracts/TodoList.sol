@@ -6,8 +6,9 @@ error TodoList__NotFound();
 
 contract TodoList {
     struct Todo {
+        uint256 id;
         string message;
-        string date;
+        uint256 date;
         bool isCompleted;
     }
 
@@ -18,75 +19,76 @@ contract TodoList {
 
 
     mapping (address =>  Todo[])  private  s_addressToTodos;
-
-
-    function storeTodo(string memory message, string memory date, bool isCompleted) public {
-        s_addressToTodos[msg.sender].push(Todo(message, date, isCompleted));
+    uint256 private s_currentId = 1;
+    
+    function storeTodo(string memory message, uint256 date, bool isCompleted) public {
+        s_addressToTodos[msg.sender].push(Todo(s_currentId++, message, date, isCompleted));
         emit TodoStore(msg.sender);
     }
 
-    function markTodoDone(uint256 index) public {
+    function markTodoDone(uint256 id) public {
         Todo[] storage myTodos = s_addressToTodos[msg.sender];
-        if(index >= myTodos.length){
-            revert TodoList__NotFound();
-        }
-        myTodos[index].isCompleted = true;
+        uint256 todoIndex = getTodoIndex(id);
+        myTodos[todoIndex].isCompleted = true;
         s_addressToTodos[msg.sender] = myTodos;
         emit TodoUpdate(msg.sender);
     }
 
-    function markTodoUndone(uint256 index) public {
+
+    function markTodoUndone(uint256 id) public {
         Todo[] storage myTodos = s_addressToTodos[msg.sender];
-        if(index >= myTodos.length){
-            revert TodoList__NotFound();
-        }
-        myTodos[index].isCompleted = false;
+        uint256 todoIndex = getTodoIndex(id);
+        myTodos[todoIndex].isCompleted = false;
         s_addressToTodos[msg.sender] = myTodos;
         emit TodoUpdate(msg.sender);
     }
 
-    function updateTodo(string memory message, string memory date, bool isCompleted, uint256 index) public {
+    function updateTodo(string memory message , uint256 date, bool isCompleted, uint256 id) public {
         Todo[] storage myTodos = s_addressToTodos[msg.sender];
-        if(index >= myTodos.length){
-            revert TodoList__NotFound();
-        }
-        myTodos[index] = Todo(message, date, isCompleted);
+        uint256 todoIndex = getTodoIndex(id);
+        myTodos[todoIndex] = Todo(myTodos[todoIndex].id, message, date, isCompleted); 
         s_addressToTodos[msg.sender] = myTodos;
         emit TodoUpdate(msg.sender);
     }
 
-    function removeTodo(uint256 index) public {
+    function removeTodo(uint256 id) public {
         Todo[] storage myTodos = s_addressToTodos[msg.sender];
-        if(index >= myTodos.length){
-            revert TodoList__NotFound();
+        uint256 todoIndex = getTodoIndex(id);
+        if(todoIndex != myTodos.length - 1){ 
+            myTodos[todoIndex] = myTodos[myTodos.length - 1];
         }
-        myTodos[index] = myTodos[myTodos.length - 1];
         myTodos.pop();
-
         s_addressToTodos[msg.sender] = myTodos;
         emit TodoRemove(msg.sender);
     }
 
     function clearTodo() public {
         delete s_addressToTodos[msg.sender];
-
-
         emit TodoClear(msg.sender);
     }
 
     function getTodos() public view returns(Todo[] memory) {
         return s_addressToTodos[msg.sender];
     }
-    function getTodo(uint256 index) public view returns(Todo memory) {
-        return s_addressToTodos[msg.sender][index];
+    function getTodoIndex(uint256 id) public view returns(uint256) {
+        Todo[] storage myTodos = s_addressToTodos[msg.sender];
+        for(uint256 i = 0; i < myTodos.length; i++){
+            if(myTodos[i].id == id){
+                return i;
+            }
+        }
+        revert TodoList__NotFound();
     }
-
-    // function getOwner(uint256 index) public view returns (address) {
-    //     return s_owners[index];
-    // }
-
-
-
-
-    
+    function getTodo(uint256 id) public view returns(Todo memory) {
+        Todo[] storage myTodos = s_addressToTodos[msg.sender];
+        for(uint256 i = 0; i < myTodos.length; i++){
+            if(myTodos[i].id == id){
+                return myTodos[i];
+            }
+        }
+        revert TodoList__NotFound();
+    }
+    function getCurrentId() public view returns(uint256){
+        return s_currentId;
+    }
 }
